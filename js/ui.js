@@ -72,6 +72,22 @@ const UI = (() => {
       ?.addEventListener('click', () => {
         document.getElementById('folder-input').click();
       });
+
+    document.getElementById('expand-all-btn')
+      ?.addEventListener('click', () => {
+        document.querySelectorAll('.topic-group, .lesson-group').forEach(el => {
+          el.classList.add('open');
+        });
+        document.querySelectorAll('.topic-header').forEach(h => h.setAttribute('aria-expanded', 'true'));
+      });
+
+    document.getElementById('collapse-all-btn')
+      ?.addEventListener('click', () => {
+        document.querySelectorAll('.topic-group, .lesson-group').forEach(el => {
+          el.classList.remove('open');
+        });
+        document.querySelectorAll('.topic-header').forEach(h => h.setAttribute('aria-expanded', 'false'));
+      });
   }
 
   // ── Render course in sidebar ──────────────────────────────
@@ -184,8 +200,7 @@ const UI = (() => {
             </span>
             <span class="video-text">
               <span class="video-title">${_esc(video.title)}</span>
-            </span>
-            ${video.hasSubtitles ? '<span class="video-subtitle-badge">CC</span>' : ''}`;
+            </span>`;
 
           item.addEventListener('click', () => {
             onVideoSelect(video);
@@ -204,22 +219,9 @@ const UI = (() => {
   }
 
   function _renderSidebarFooter() {
-    const stats = Storage.getCourseStats(flatList.map(v => v.id));
     const footer = document.getElementById('sidebar-footer-stats');
     if (!footer) return;
-    footer.innerHTML = `
-      <div class="stat-pill">
-        <div class="stat-value">${stats.completed}</div>
-        <div class="stat-label">Done</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-value">${stats.total}</div>
-        <div class="stat-label">Total</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-value">${stats.percent}%</div>
-        <div class="stat-label">Progress</div>
-      </div>`;
+    // Footer is now collapse/expand controls — rendered once in HTML, nothing dynamic needed
   }
 
   // ── Update progress bar in sidebar header ────────────────
@@ -229,7 +231,6 @@ const UI = (() => {
     const pct  = document.getElementById('sidebar-progress-pct');
     if (fill) fill.style.width = stats.percent + '%';
     if (pct)  pct.textContent  = stats.percent + '%';
-    _renderSidebarFooter();
   }
 
   // ── Set active video in sidebar ───────────────────────────

@@ -87,17 +87,6 @@
   font-family: var(--font-mono);
 }
 
-/* ── Load Button (inside sidebar) ─────────────────────── */
-.sidebar-load-area {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
 /* ── Tree Navigation ───────────────────────────────────── */
 #sidebar-nav {
   flex: 1;
@@ -359,52 +348,40 @@
   font-family: var(--font-mono);
 }
 
-/* Subtitle badge */
-.video-subtitle-badge {
-  font-size: 0.65rem;
-  background: var(--bg-tertiary);
-  color: var(--text-muted);
-  padding: 1px 5px;
-  border-radius: 3px;
-  border: 1px solid var(--border);
-  margin-right: 10px;
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  letter-spacing: 0.02em;
-}
-
 /* ── Sidebar Footer ────────────────────────────────────── */
 .sidebar-footer {
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
 
-.sidebar-stats {
+.sidebar-tree-controls {
   display: flex;
   gap: 6px;
 }
-.stat-pill {
+
+.sidebar-tree-btn {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 6px 8px;
-  text-align: center;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  white-space: nowrap;
 }
-.stat-value {
-  font-size: 0.95rem;
-  font-weight: 700;
+.sidebar-tree-btn:hover {
+  background: var(--bg-hover);
   color: var(--text-primary);
-  font-family: var(--font-mono);
-  line-height: 1;
-}
-.stat-label {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  border-color: var(--border);
 }
 
 /* ── Sidebar Empty State ───────────────────────────────── */

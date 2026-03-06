@@ -19,12 +19,18 @@ const Parser = (() => {
 
     // Match leading number prefix  (e.g. "01_", "2.", "03 ")
     const prefixMatch = raw.match(/^(\d+)[_.\s-]+(.*)$/);
+    // Also match pure number (e.g. "01", "2") with nothing after
+    const numOnlyMatch = !prefixMatch && raw.match(/^(\d+)$/);
+
     let number = null;
     let rest = raw;
 
     if (prefixMatch) {
       number = parseInt(prefixMatch[1], 10);
       rest   = prefixMatch[2];
+    } else if (numOnlyMatch) {
+      number = parseInt(numOnlyMatch[1], 10);
+      rest   = '';
     }
 
     // Replace separators with spaces, capitalize each word
@@ -34,7 +40,12 @@ const Parser = (() => {
       .trim()
       .replace(/\b\w/g, c => c.toUpperCase());
 
-    return number !== null ? `${number}. ${label}` : label;
+    if (number !== null) {
+      // If there's a meaningful label after the number, show "N. Label"
+      // If not (pure number folder), just return "N" — caller will need the raw name
+      return label ? `${number}. ${label}` : `${number}`;
+    }
+    return label || raw;
   }
 
   /**
@@ -197,9 +208,12 @@ const Parser = (() => {
       const topicTitle   = topicKey === '__root__' ? courseTitle : cleanName(topicKey);
       const topicId      = `topic:${topicKey}`;
 
-      const sortedLessons = [...lessonMap.keys()].sort((a, b) =>
-        sortKey(a) - sortKey(b)
-      );
+      const sortedLessons = [...lessonMap.keys()].sort((a, b) => {
+        // Sort by numeric prefix of the last path segment
+        const aKey = a === '__flat__' ? '' : a.split('/').pop();
+        const bKey = b === '__flat__' ? '' : b.split('/').pop();
+        return sortKey(aKey) - sortKey(bKey);
+      });
 
       const lessons = sortedLessons.map(lessonKey => {
         const dirs        = lessonMap.get(lessonKey);

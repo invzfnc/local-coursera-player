@@ -263,7 +263,7 @@ const Player = (() => {
     nextBtn?.addEventListener('click', next);
     autoAdvanceCancel?.addEventListener('click', _cancelAutoAdvance);
 
-    // ── YouTube-style controls auto-hide ─────────────────
+    // ── Controls auto-hide — FULLSCREEN ONLY ─────────────
     const videoWrapper = document.getElementById('video-wrapper');
     let hideControlsTimer = null;
 
@@ -274,8 +274,8 @@ const Player = (() => {
 
     function scheduleHideControls() {
       clearTimeout(hideControlsTimer);
-      // Only hide when playing
-      if (!videoEl.paused) {
+      // Only hide when playing AND in fullscreen
+      if (!videoEl.paused && document.fullscreenElement) {
         hideControlsTimer = setTimeout(() => {
           videoWrapper.classList.add('controls-hidden');
         }, 2500);
@@ -284,33 +284,44 @@ const Player = (() => {
 
     // Show on any mouse movement inside wrapper
     videoWrapper.addEventListener('mousemove', () => {
+      if (!document.fullscreenElement) return;
       showControls();
       scheduleHideControls();
     });
 
-    // Always show when mouse enters controls bar
+    // Always show when mouse is on controls bar
     document.getElementById('player-controls')?.addEventListener('mouseenter', () => {
+      if (!document.fullscreenElement) return;
       showControls();
     });
 
-    // When mouse leaves the video area, start timer
     videoWrapper.addEventListener('mouseleave', () => {
+      if (!document.fullscreenElement) return;
       scheduleHideControls();
     });
 
-    // Show controls on play/pause state changes
+    // Play/pause state changes
     videoEl.addEventListener('play', () => {
       videoWrapper.classList.remove('paused');
-      scheduleHideControls();
+      if (document.fullscreenElement) scheduleHideControls();
     });
 
     videoEl.addEventListener('pause', () => {
       videoWrapper.classList.add('paused');
-      showControls();
+      showControls(); // always show when paused
     });
 
-    // Touch: tap shows controls temporarily
+    // On fullscreen exit: always restore controls visibility
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        showControls();
+        clearTimeout(hideControlsTimer);
+      }
+    });
+
+    // Touch support in fullscreen
     videoWrapper.addEventListener('touchstart', () => {
+      if (!document.fullscreenElement) return;
       showControls();
       scheduleHideControls();
     }, { passive: true });

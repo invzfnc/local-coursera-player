@@ -1,0 +1,12 @@
+The side bar now looks very good! Just some little tweaks needed:
+* The first level folders are unnamed, just numbered. Display the name of the topics as "number. topic", like "1. Machine Learning", instead of just "1"
+* Remove the "CC" indicator for each entry in the side bar. It feels redundant as all video should have come with the subtitles already.
+* The second level folders are not listed in the ascending order.
+* Remove the bottom section showing "Done", "Total", and "Progress", and add a collapse all and expand all button.
+* Remove the "Select Course Folder" in the side bar.
+
+For the video player:
+* Increase subtitle readability by increasing the font size of the subtitles, also position it a little higher above its original position, preferably joining lines of captions instead of splitting it into two. Only split it into two lines if it's really too long to be fitted into the video player, minimize the gap between the split lines for better readability.
+* Remove the overlay, put the player-controls under the video player. 
+* Enable the overlay only in full screen mode.  Make overlay active only when cursor moves. Set it inactive after cursor is inactive for a few seconds.
+* Move the video-info-bar to the bottom, beneath the player-controls (the order will be video player -> player controls -> info bar)

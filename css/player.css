@@ -103,43 +103,63 @@
 }
 .speed-overlay-badge.visible { opacity: 1; }
 
-/* ── Controls Bar ──────────────────────────────────────── */
+/* ── Controls Bar — sits BELOW the video in normal mode ── */
 #player-controls {
-  background: linear-gradient(transparent, rgba(0,0,0,0.72) 40%, rgba(0,0,0,0.88));
-  border-top: none;
-  padding: 0 16px 14px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px 10px;
   flex-shrink: 0;
   user-select: none;
-  /* YouTube-style: overlay at bottom of video wrapper */
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
+  position: relative;
   z-index: 10;
-  /* Hide/show transitions */
+  /* No absolute positioning in normal mode */
   opacity: 1;
-  transform: translateY(0);
   transition: opacity 0.25s ease, transform 0.25s ease;
-  pointer-events: auto;
 }
 
-/* Controls are hidden when wrapper has .controls-hidden and video is playing */
-#video-wrapper.controls-hidden #player-controls {
+/* ── Normal mode: overlay/hide classes do NOTHING ──────── */
+#video-wrapper.controls-hidden #player-controls { /* no-op outside fullscreen */ }
+#video-wrapper.paused #player-controls          { /* no-op outside fullscreen */ }
+#video-wrapper.controls-hidden                  { cursor: default; }
+
+/* ── Fullscreen: controls become an overlay ────────────── */
+#video-wrapper:fullscreen {
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+}
+
+#video-wrapper:fullscreen video {
+  flex: 1;
+  min-height: 0;
+}
+
+#video-wrapper:fullscreen #player-controls {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.75) 30%, rgba(0,0,0,0.92));
+  border: none;
+  padding: 0 16px 18px;
+}
+
+/* In fullscreen: hide when controls-hidden (cursor inactive) */
+#video-wrapper:fullscreen.controls-hidden #player-controls {
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(8px);
   pointer-events: none;
 }
 
-/* Always show controls when paused */
-#video-wrapper.paused #player-controls {
+/* In fullscreen: always show when paused */
+#video-wrapper:fullscreen.paused #player-controls {
   opacity: 1 !important;
   transform: translateY(0) !important;
   pointer-events: auto !important;
 }
 
-/* Cursor hide when controls hidden */
-#video-wrapper.controls-hidden {
-  cursor: none;
-}
-#video-wrapper.controls-hidden #video-overlay {
+/* In fullscreen: hide cursor when inactive */
+#video-wrapper:fullscreen.controls-hidden,
+#video-wrapper:fullscreen.controls-hidden #video-overlay {
   cursor: none;
 }
 
@@ -152,7 +172,7 @@
 
 .scrubber-track {
   height: 4px;
-  background: rgba(255,255,255,0.25);
+  background: var(--border);
   border-radius: 100px;
   position: relative;
   overflow: visible;
@@ -163,10 +183,14 @@
 .scrubber-buffer {
   position: absolute;
   top: 0; left: 0; bottom: 0;
-  background: rgba(255,255,255,0.35);
+  background: var(--bg-active);
   border-radius: 100px;
   pointer-events: none;
 }
+
+/* Fullscreen overrides for scrubber */
+#video-wrapper:fullscreen .scrubber-track { background: rgba(255,255,255,0.25); }
+#video-wrapper:fullscreen .scrubber-buffer { background: rgba(255,255,255,0.35); }
 
 .scrubber-progress {
   position: absolute;
@@ -243,13 +267,13 @@
   flex: 0 0 auto;
 }
 
-/* Player button */
+/* Player button — theme-aware in normal mode */
 .player-btn {
   width: 36px;
   height: 36px;
   border: none;
   background: none;
-  color: rgba(255,255,255,0.85);
+  color: var(--text-secondary);
   cursor: pointer;
   border-radius: var(--radius-sm);
   display: flex;
@@ -259,20 +283,36 @@
   flex-shrink: 0;
 }
 .player-btn:hover {
-  background: rgba(255,255,255,0.15);
-  color: white;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 .player-btn.active { color: var(--accent); }
 
-/* Play button larger */
+/* In fullscreen, switch to white-on-dark */
+#video-wrapper:fullscreen .player-btn {
+  color: rgba(255,255,255,0.85);
+}
+#video-wrapper:fullscreen .player-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+/* Play button */
 #play-pause-btn {
   width: 40px;
   height: 40px;
-  background: rgba(255,255,255,0.15);
+  background: var(--accent);
   color: white;
   border-radius: var(--radius-sm);
 }
-#play-pause-btn:hover { background: rgba(255,255,255,0.25); }
+#play-pause-btn:hover { background: var(--accent-hover); }
+
+#video-wrapper:fullscreen #play-pause-btn {
+  background: rgba(255,255,255,0.15);
+}
+#video-wrapper:fullscreen #play-pause-btn:hover {
+  background: rgba(255,255,255,0.25);
+}
 
 /* ── Volume Control ────────────────────────────────────── */
 .volume-group {
@@ -316,19 +356,23 @@
 .time-display {
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.75);
+  color: var(--text-secondary);
   white-space: nowrap;
   padding: 0 4px;
 }
-.time-display .current { color: white; font-weight: 500; }
-.time-display .sep { color: rgba(255,255,255,0.4); margin: 0 2px; }
+.time-display .current { color: var(--text-primary); font-weight: 500; }
+.time-display .sep { color: var(--text-muted); margin: 0 2px; }
+
+#video-wrapper:fullscreen .time-display { color: rgba(255,255,255,0.75); }
+#video-wrapper:fullscreen .time-display .current { color: white; }
+#video-wrapper:fullscreen .time-display .sep { color: rgba(255,255,255,0.4); }
 
 /* ── Speed Select ──────────────────────────────────────── */
 #speed-select {
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 500;
@@ -338,23 +382,29 @@
   height: 32px;
   transition: border-color var(--transition), background var(--transition);
 }
-#speed-select:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.18); }
+#speed-select:hover { border-color: var(--text-muted); }
 #speed-select:focus { border-color: var(--accent); }
-#speed-select option { background: #1e1c19; color: white; }
+
+#video-wrapper:fullscreen #speed-select {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+  color: white;
+}
+#video-wrapper:fullscreen #speed-select option { background: #1e1c19; color: white; }
+
+/* ── Fullscreen tweaks ─────────────────────────────────── */
+/* video-info-bar is hidden in fullscreen */
+#video-wrapper:fullscreen ~ #video-info-bar { display: none; }
 
 /* ── Subtitle Button ───────────────────────────────────── */
 #subtitle-btn.has-subtitles { color: var(--accent); }
+#subtitle-btn.active { color: var(--accent); }
 
-/* ── Fullscreen tweaks ─────────────────────────────────── */
-#video-wrapper:fullscreen #player-controls {
-  padding-bottom: 18px;
-}
-#video-wrapper:fullscreen { cursor: default; }
-
-/* ── Video Info Bar ────────────────────────────────────── */
+/* ── Video Info Bar — below player controls ────────────── */
 #video-info-bar {
-  padding: 10px 16px;
+  padding: 10px 16px 12px;
   border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -366,7 +416,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.3;
+  line-height: 1.35;
   letter-spacing: -0.01em;
 }
 .video-current-meta {
@@ -382,13 +432,36 @@
   flex-shrink: 0;
 }
 
-/* ── Subtitle Display (native track) ──────────────────── */
+/* ── Subtitle Display ──────────────────────────────────── */
 video::cue {
-  background: rgba(0,0,0,0.75);
+  background: rgba(0, 0, 0, 0.0);   /* transparent — we use text-shadow instead */
   color: white;
   font-family: var(--font-ui);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  /* Minimise the gap between wrapped lines */
+  white-space: pre-line;
+}
+
+/* Boost cue container positioning — push captions higher off the bottom */
+video::-webkit-media-text-track-display {
+  bottom: 12% !important;
+}
+
+/* Strong text shadow for legibility on any background */
+video::cue(b), video::cue {
+  text-shadow:
+    0 1px 4px rgba(0,0,0,0.95),
+    0 0 8px rgba(0,0,0,0.9),
+    1px 1px 0 rgba(0,0,0,0.8),
+   -1px -1px 0 rgba(0,0,0,0.8),
+    1px -1px 0 rgba(0,0,0,0.8),
+   -1px  1px 0 rgba(0,0,0,0.8);
+}
+
+/* Subtitle track container — force single-line preference, tight wrapping */
+video::cue-region {
+  line-height: 1.3;
 }
 
 /* ── Loading Spinner ───────────────────────────────────── */

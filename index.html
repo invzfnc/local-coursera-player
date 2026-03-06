@@ -98,18 +98,6 @@
       </div>
     </div>
 
-    <!-- Load button inside sidebar when empty -->
-    <div class="sidebar-load-area">
-      <button class="btn btn-primary btn-sm" id="open-folder-sidebar-btn"
-              onclick="document.getElementById('folder-input').click()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>
-        </svg>
-        Select Course Folder
-      </button>
-    </div>
-
     <!-- Navigation tree -->
     <nav id="sidebar-nav" aria-label="Course content">
       <!-- Rendered by ui.js -->
@@ -122,21 +110,23 @@
       </div>
     </nav>
 
-    <!-- Sidebar footer: stats -->
+    <!-- Sidebar footer: collapse / expand all -->
     <div class="sidebar-footer">
-      <div id="sidebar-footer-stats" class="sidebar-stats">
-        <div class="stat-pill">
-          <div class="stat-value">—</div>
-          <div class="stat-label">Done</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-value">—</div>
-          <div class="stat-label">Total</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-value">—</div>
-          <div class="stat-label">Progress</div>
-        </div>
+      <div class="sidebar-tree-controls" id="sidebar-footer-stats">
+        <button class="sidebar-tree-btn" id="expand-all-btn" data-tooltip="Expand all">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/>
+          </svg>
+          Expand All
+        </button>
+        <button class="sidebar-tree-btn" id="collapse-all-btn" data-tooltip="Collapse all">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="7 11 12 6 17 11"/><polyline points="7 18 12 13 17 18"/>
+          </svg>
+          Collapse All
+        </button>
       </div>
     </div>
 
@@ -195,37 +185,13 @@
     <!-- ── Player Screen ─────────────────────────────────── -->
     <div id="player-screen">
 
-      <!-- Video info bar -->
-      <div id="video-info-bar">
-        <div>
-          <div id="video-current-title" class="video-current-title">—</div>
-          <div id="video-current-meta" class="video-current-meta"></div>
-        </div>
-        <div class="video-actions">
-          <button class="btn btn-ghost btn-sm btn-icon-only" id="prev-video-btn"
-                  onclick="Player.prev()" data-tooltip="Previous video" aria-label="Previous video">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>
-            </svg>
-          </button>
-          <button class="btn btn-ghost btn-sm btn-icon-only" id="next-video-btn-info"
-                  onclick="Player.next()" data-tooltip="Next video" aria-label="Next video">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
       <!-- Video wrapper -->
       <div id="video-wrapper">
 
         <!-- The video element -->
         <video id="video-el" preload="metadata" playsinline></video>
 
-        <!-- Click overlay -->
+        <!-- Click overlay (play/pause) — always present but only intercepts in fullscreen -->
         <div id="video-overlay">
           <!-- Play indicator flash -->
           <div class="play-indicator" id="play-indicator">
@@ -237,7 +203,7 @@
           <div class="seek-indicator right" id="seek-right-indicator"></div>
         </div>
 
-        <!-- Speed overlay badge -->
+        <!-- Speed overlay badge (always in video) -->
         <div class="speed-overlay-badge" id="speed-overlay-badge">2×</div>
 
         <!-- Loading spinner -->
@@ -260,9 +226,14 @@
           <button class="auto-advance-cancel" id="auto-advance-cancel">Cancel</button>
         </div>
 
+        <!-- Fullscreen-only controls overlay (hidden unless :fullscreen) -->
+        <div id="fullscreen-controls-overlay">
+          <!-- Player Controls (cloned into here in fullscreen via CSS/JS) -->
+        </div>
+
       </div><!-- /video-wrapper -->
 
-      <!-- Player Controls -->
+      <!-- Player Controls — sits below video in normal mode -->
       <div id="player-controls">
 
         <!-- Scrubber / Progress bar -->
@@ -348,6 +319,30 @@
 
         </div><!-- /controls-row -->
       </div><!-- /player-controls -->
+
+      <!-- Video info bar — below controls -->
+      <div id="video-info-bar">
+        <div style="min-width:0;flex:1">
+          <div id="video-current-title" class="video-current-title">—</div>
+          <div id="video-current-meta" class="video-current-meta"></div>
+        </div>
+        <div class="video-actions">
+          <button class="btn btn-ghost btn-sm btn-icon-only" id="prev-video-btn"
+                  onclick="Player.prev()" data-tooltip="Previous video" aria-label="Previous video">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>
+            </svg>
+          </button>
+          <button class="btn btn-ghost btn-sm btn-icon-only" id="next-video-btn-info"
+                  onclick="Player.next()" data-tooltip="Next video" aria-label="Next video">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+            </svg>
+          </button>
+        </div>
+      </div><!-- /video-info-bar -->
 
     </div><!-- /player-screen -->
 
