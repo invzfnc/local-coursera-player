@@ -4,25 +4,56 @@
 
 #sidebar {
   width: var(--sidebar-width);
+  min-width: 220px;
+  max-width: 560px;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-  transition: width var(--transition), transform var(--transition), opacity var(--transition);
+  position: relative;
+  transition: opacity var(--transition);
 }
 
 #sidebar.collapsed {
-  width: 0;
+  width: 0 !important;
+  min-width: 0;
   border-right-width: 0;
   opacity: 0;
   overflow: hidden;
 }
 
+/* ── Resize Handle ──────────────────────────────────────── */
+#sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-resize-handle::after {
+  content: '';
+  width: 3px;
+  height: 48px;
+  border-radius: 100px;
+  background: transparent;
+  transition: background 0.15s;
+  pointer-events: none;
+}
+#sidebar-resize-handle:hover::after,
+#sidebar-resize-handle.dragging::after {
+  background: var(--accent);
+}
+
 /* ── Sidebar Header ────────────────────────────────────── */
 .sidebar-header {
-  padding: 14px 16px 10px;
+  padding: 16px 18px 14px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -71,12 +102,19 @@
 #sidebar-nav {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 6px 0 12px;
 }
 
 /* ── Topic Group ───────────────────────────────────────── */
 .topic-group {
-  margin-bottom: 2px;
+  margin-bottom: 0;
+}
+
+/* Horizontal divider between topic groups */
+.topic-group + .topic-group {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 4px;
+  padding-top: 4px;
 }
 
 .topic-header {
@@ -84,7 +122,7 @@
   align-items: center;
   gap: 0;
   width: 100%;
-  padding: 0;
+  padding: 2px 0;
   background: none;
   border: none;
   cursor: pointer;
@@ -97,8 +135,8 @@
 .topic-header:hover { background: var(--bg-hover); }
 
 .topic-chevron {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,22 +148,22 @@
 
 .topic-title-area {
   flex: 1;
-  padding: 6px 12px 6px 0;
+  padding: 8px 12px 8px 0;
   min-width: 0;
 }
 .topic-title {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 .topic-meta {
-  font-size: 0.72rem;
+  font-size: 0.73rem;
   color: var(--text-muted);
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .topic-progress-dot {
@@ -134,7 +172,7 @@
   border-radius: 50%;
   background: var(--border);
   flex-shrink: 0;
-  margin-right: 12px;
+  margin-right: 14px;
   transition: background var(--transition);
 }
 .topic-group.all-complete .topic-progress-dot { background: var(--success); }
@@ -146,18 +184,24 @@
 .topic-lessons {
   display: none;
   padding-left: 0;
+  padding-bottom: 4px;
 }
 .topic-group.open .topic-lessons { display: block; }
 
 .lesson-group {
-  margin: 2px 0;
+  margin: 0;
+}
+
+/* Subtle divider between lessons inside a topic */
+.lesson-group + .lesson-group {
+  border-top: 1px solid var(--border-subtle);
 }
 
 .lesson-header {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0;
+  padding: 2px 0;
   background: none;
   border: none;
   cursor: pointer;
@@ -168,25 +212,25 @@
 .lesson-header:hover { background: var(--bg-hover); }
 
 .lesson-chevron {
-  width: 36px;
-  height: 32px;
+  width: 40px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: var(--text-muted);
-  padding-left: 16px;
+  padding-left: 18px;
   transition: transform var(--transition);
 }
 .lesson-group.open .lesson-chevron svg { transform: rotate(90deg); }
 
 .lesson-title-area {
   flex: 1;
-  padding: 5px 12px 5px 0;
+  padding: 7px 12px 7px 0;
   min-width: 0;
 }
 .lesson-title {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 500;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -194,15 +238,17 @@
   text-overflow: ellipsis;
 }
 .lesson-count {
-  font-size: 0.7rem;
+  font-size: 0.71rem;
   color: var(--text-muted);
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* ── Lesson Videos ─────────────────────────────────────── */
 .lesson-videos {
   display: none;
-  padding: 2px 0;
+  padding: 3px 0 6px;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-subtle);
 }
 .lesson-group.open .lesson-videos { display: block; }
 
@@ -239,13 +285,13 @@
 
 /* Status icon column */
 .video-status {
-  width: 52px;
-  height: 40px;
+  width: 56px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding-left: 26px;
+  padding-left: 30px;
 }
 
 .status-icon {
@@ -291,16 +337,16 @@
 /* Video text */
 .video-text {
   flex: 1;
-  padding: 8px 12px 8px 0;
+  padding: 10px 12px 10px 0;
   min-width: 0;
 }
 .video-title {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.3;
+  line-height: 1.35;
   font-weight: 400;
 }
 .video-item.active .video-title { color: var(--accent); font-weight: 500; }

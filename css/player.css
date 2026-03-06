@@ -21,7 +21,9 @@
   justify-content: center;
   overflow: hidden;
   min-height: 0;
+  /* paused state class for CSS targeting */
 }
+#video-wrapper.paused {}
 
 #video-wrapper video {
   width: 100%;
@@ -103,11 +105,42 @@
 
 /* ── Controls Bar ──────────────────────────────────────── */
 #player-controls {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  padding: 0 16px 12px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.72) 40%, rgba(0,0,0,0.88));
+  border-top: none;
+  padding: 0 16px 14px;
   flex-shrink: 0;
   user-select: none;
+  /* YouTube-style: overlay at bottom of video wrapper */
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  /* Hide/show transitions */
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto;
+}
+
+/* Controls are hidden when wrapper has .controls-hidden and video is playing */
+#video-wrapper.controls-hidden #player-controls {
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+}
+
+/* Always show controls when paused */
+#video-wrapper.paused #player-controls {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Cursor hide when controls hidden */
+#video-wrapper.controls-hidden {
+  cursor: none;
+}
+#video-wrapper.controls-hidden #video-overlay {
+  cursor: none;
 }
 
 /* ── Progress / Scrubber ───────────────────────────────── */
@@ -119,7 +152,7 @@
 
 .scrubber-track {
   height: 4px;
-  background: var(--border);
+  background: rgba(255,255,255,0.25);
   border-radius: 100px;
   position: relative;
   overflow: visible;
@@ -130,7 +163,7 @@
 .scrubber-buffer {
   position: absolute;
   top: 0; left: 0; bottom: 0;
-  background: var(--bg-active);
+  background: rgba(255,255,255,0.35);
   border-radius: 100px;
   pointer-events: none;
 }
@@ -216,7 +249,7 @@
   height: 36px;
   border: none;
   background: none;
-  color: var(--text-secondary);
+  color: rgba(255,255,255,0.85);
   cursor: pointer;
   border-radius: var(--radius-sm);
   display: flex;
@@ -226,8 +259,8 @@
   flex-shrink: 0;
 }
 .player-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: rgba(255,255,255,0.15);
+  color: white;
 }
 .player-btn.active { color: var(--accent); }
 
@@ -235,11 +268,11 @@
 #play-pause-btn {
   width: 40px;
   height: 40px;
-  background: var(--accent);
+  background: rgba(255,255,255,0.15);
   color: white;
   border-radius: var(--radius-sm);
 }
-#play-pause-btn:hover { background: var(--accent-hover); }
+#play-pause-btn:hover { background: rgba(255,255,255,0.25); }
 
 /* ── Volume Control ────────────────────────────────────── */
 .volume-group {
@@ -283,19 +316,19 @@
 .time-display {
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  color: var(--text-secondary);
+  color: rgba(255,255,255,0.75);
   white-space: nowrap;
   padding: 0 4px;
 }
-.time-display .current { color: var(--text-primary); font-weight: 500; }
-.time-display .sep { color: var(--text-muted); margin: 0 2px; }
+.time-display .current { color: white; font-weight: 500; }
+.time-display .sep { color: rgba(255,255,255,0.4); margin: 0 2px; }
 
 /* ── Speed Select ──────────────────────────────────────── */
 #speed-select {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: var(--radius-sm);
-  color: var(--text-primary);
+  color: white;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 500;
@@ -303,25 +336,20 @@
   cursor: pointer;
   outline: none;
   height: 32px;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), background var(--transition);
 }
-#speed-select:hover { border-color: var(--text-muted); }
+#speed-select:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.18); }
 #speed-select:focus { border-color: var(--accent); }
+#speed-select option { background: #1e1c19; color: white; }
 
 /* ── Subtitle Button ───────────────────────────────────── */
 #subtitle-btn.has-subtitles { color: var(--accent); }
 
-/* ── Fullscreen ────────────────────────────────────────── */
+/* ── Fullscreen tweaks ─────────────────────────────────── */
 #video-wrapper:fullscreen #player-controls {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,0.85));
-  padding-bottom: 16px;
-  border-top: none;
+  padding-bottom: 18px;
 }
-#video-wrapper:fullscreen #player-controls .time-display { color: rgba(255,255,255,0.8); }
-#video-wrapper:fullscreen #player-controls .player-btn { color: rgba(255,255,255,0.8); }
-#video-wrapper:fullscreen #player-controls .player-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+#video-wrapper:fullscreen { cursor: default; }
 
 /* ── Video Info Bar ────────────────────────────────────── */
 #video-info-bar {

@@ -10,6 +10,46 @@
   let course   = null;
   let flatList = [];
 
+  // ── Sidebar resize ────────────────────────────────────────
+  function _initSidebarResize() {
+    const handle  = document.getElementById('sidebar-resize-handle');
+    const sidebar = document.getElementById('sidebar');
+    if (!handle || !sidebar) return;
+
+    let startX    = 0;
+    let startW    = 0;
+    let dragging  = false;
+
+    function onMouseDown(e) {
+      e.preventDefault();
+      dragging  = true;
+      startX    = e.clientX;
+      startW    = sidebar.getBoundingClientRect().width;
+      handle.classList.add('dragging');
+      document.body.style.cursor     = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    function onMouseMove(e) {
+      if (!dragging) return;
+      const delta  = e.clientX - startX;
+      const newW   = Math.min(560, Math.max(220, startW + delta));
+      sidebar.style.width = newW + 'px';
+    }
+
+    function onMouseUp() {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('dragging');
+      document.body.style.cursor     = '';
+      document.body.style.userSelect = '';
+    }
+
+    handle.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup',   onMouseUp);
+  }
+
   // ── Boot ──────────────────────────────────────────────────
   function init() {
     // Init modules
@@ -39,6 +79,7 @@
 
     // Restore last session
     _tryRestoreSession();
+    _initSidebarResize();
   }
 
   // ── Folder loading ────────────────────────────────────────

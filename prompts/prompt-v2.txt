@@ -1,0 +1,8 @@
+I really like the outcome, thanks! Just need a few tweaks based on the current version:
+* Make the side navigation bar wider
+* The captions/subtitles are not working (not visible). Write a helper function to convert SRT string content to VTT blobs on the fly so the browser <track> tag can read them.
+* Fully expand the side bar contents by default (do not collapse them on start).
+* Improve side bar readability by adding horizontal divider between contents, add padding between elements in the side bar, make it look less cramped.
+* Make the side navigation bar resizable.
+* For the video player, show bottom menu items when cursor hovers over the media player, hide the items after moments of inactivity, refer to the YouTube video player.
+* Generate a README.md for this project

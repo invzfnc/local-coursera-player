@@ -117,13 +117,13 @@ const UI = (() => {
       const group = document.createElement('div');
       group.className = [
         'topic-group',
-        ti === 0 ? 'open' : '',
+        'open',   // all topics expanded by default
         isAllDone ? 'all-complete' : '',
         isSomeDone ? 'some-complete' : '',
       ].filter(Boolean).join(' ');
 
       group.innerHTML = `
-        <button class="topic-header" aria-expanded="${ti === 0}">
+        <button class="topic-header" aria-expanded="true">
           <span class="topic-chevron">${_icon('chevron-right', 14)}</span>
           <span class="topic-title-area">
             <span class="topic-title">${_esc(topic.title)}</span>
@@ -144,7 +144,7 @@ const UI = (() => {
       // Render lessons
       topic.lessons.forEach((lesson, li) => {
         const lessonGroup = document.createElement('div');
-        lessonGroup.className = 'lesson-group' + (ti === 0 && li === 0 ? ' open' : '');
+        lessonGroup.className = 'lesson-group open'; // all lessons expanded by default
         lessonGroup.dataset.lessonId = lesson.id;
 
         const completedInLesson = lesson.videos.filter(v => completed.has(v.id)).length;

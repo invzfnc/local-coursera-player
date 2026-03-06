@@ -126,23 +126,77 @@ const Player = (() => {
     _updateNextBtn();
   }
 
-  function _loadSubtitles(subFiles) {
-    // Revoke old
+  /**
+   * Convert an SRT string to a valid WebVTT string.
+   * Handles the timestamp format difference:
+   *   SRT:  00:00:01,500 --> 00:00:04,000
+   *   VTT:  00:00:01.500 --> 00:00:04.000
+   */
+  function _srtToVtt(srtText) {
+    const vtt = srtText
+      // Normalize Windows line endings
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      // Replace SRT timestamp comma with VTT dot
+      .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2')
+      // Strip any BOM
+      .replace(/^\uFEFF/, '');
+    return 'WEBVTT\n\n' + vtt.trim();
+  }
+
+  /**
+   * Read a File as text (returns a Promise<string>).
+   */
+  function _readFileText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Could not read ' + file.name));
+      reader.readAsText(file, 'utf-8');
+    });
+  }
+
+  async function _loadSubtitles(subFiles) {
+    // Revoke old blob URLs
     Object.values(subsBlobUrls).forEach(u => URL.revokeObjectURL(u));
     subsBlobUrls = {};
 
-    subFiles.forEach((file, i) => {
-      const blobUrl = URL.createObjectURL(file);
-      subsBlobUrls[file.name] = blobUrl;
+    for (let i = 0; i < subFiles.length; i++) {
+      const file = subFiles[i];
+      try {
+        let text = await _readFileText(file);
+        const isSrt = file.name.toLowerCase().endsWith('.srt');
 
-      const track = document.createElement('track');
-      track.kind    = 'subtitles';
-      track.src     = blobUrl;
-      track.srclang = _detectLang(file.name);
-      track.label   = track.srclang.toUpperCase();
-      track.default = i === 0;
-      videoEl.appendChild(track);
-    });
+        // Convert SRT → VTT on the fly
+        if (isSrt) {
+          text = _srtToVtt(text);
+        }
+
+        const blob    = new Blob([text], { type: 'text/vtt' });
+        const blobUrl = URL.createObjectURL(blob);
+        subsBlobUrls[file.name] = blobUrl;
+
+        const track   = document.createElement('track');
+        track.kind    = 'subtitles';
+        track.src     = blobUrl;
+        track.srclang = _detectLang(file.name);
+        track.label   = track.srclang.toUpperCase();
+        track.default = i === 0;
+        videoEl.appendChild(track);
+
+        // Force the first track to showing mode once loaded
+        if (i === 0) {
+          track.addEventListener('load', () => {
+            if (videoEl.textTracks[0]) {
+              videoEl.textTracks[0].mode = 'showing';
+              subtitleBtn.classList.add('active');
+            }
+          }, { once: true });
+        }
+      } catch (err) {
+        console.warn('Subtitle load error:', file.name, err);
+      }
+    }
   }
 
   function _detectLang(filename) {
@@ -208,6 +262,58 @@ const Player = (() => {
     // Next button
     nextBtn?.addEventListener('click', next);
     autoAdvanceCancel?.addEventListener('click', _cancelAutoAdvance);
+
+    // ── YouTube-style controls auto-hide ─────────────────
+    const videoWrapper = document.getElementById('video-wrapper');
+    let hideControlsTimer = null;
+
+    function showControls() {
+      videoWrapper.classList.remove('controls-hidden');
+      clearTimeout(hideControlsTimer);
+    }
+
+    function scheduleHideControls() {
+      clearTimeout(hideControlsTimer);
+      // Only hide when playing
+      if (!videoEl.paused) {
+        hideControlsTimer = setTimeout(() => {
+          videoWrapper.classList.add('controls-hidden');
+        }, 2500);
+      }
+    }
+
+    // Show on any mouse movement inside wrapper
+    videoWrapper.addEventListener('mousemove', () => {
+      showControls();
+      scheduleHideControls();
+    });
+
+    // Always show when mouse enters controls bar
+    document.getElementById('player-controls')?.addEventListener('mouseenter', () => {
+      showControls();
+    });
+
+    // When mouse leaves the video area, start timer
+    videoWrapper.addEventListener('mouseleave', () => {
+      scheduleHideControls();
+    });
+
+    // Show controls on play/pause state changes
+    videoEl.addEventListener('play', () => {
+      videoWrapper.classList.remove('paused');
+      scheduleHideControls();
+    });
+
+    videoEl.addEventListener('pause', () => {
+      videoWrapper.classList.add('paused');
+      showControls();
+    });
+
+    // Touch: tap shows controls temporarily
+    videoWrapper.addEventListener('touchstart', () => {
+      showControls();
+      scheduleHideControls();
+    }, { passive: true });
   }
 
   // ── Playback ──────────────────────────────────────────────
