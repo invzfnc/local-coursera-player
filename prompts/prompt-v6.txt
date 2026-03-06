@@ -1,0 +1,26 @@
+v4
+
+The ordering of video player, player control, and info tab is perfect. Here are the needed tweaks this time:
+
+For side bar content listing:
+* Search the folders recursively, do not merge folders, keep the folder nesting as it is and display them in the side bar. Do not set nesting level limits, just display them on the sidebar as it is.
+* Replace "x/y completed" in topic-title-area span with their original names in the respecting folder.
+
+For the video captions/subtitles:
+* Revert the caption styles back to the ones in v2.
+
+---
+
+v5
+
+For the side bar:
+* The nesting algorithm is perfect. Revert the side bar back to v3, however keep the folder nesting method in v4.
+
+---
+
+v6
+
+For now, make edit to the side bar only:
+* Third level nesting is not collapsing when clicked on. Make them collapsible and expandable.
+* status-icon and video-title is overlapping. Fix the padding between them.
+* Change topic-title, lesson-title to follow the original folder name. Keep the video-title the same as previous version. Remove lesson-count.

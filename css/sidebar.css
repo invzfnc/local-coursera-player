@@ -211,7 +211,8 @@
   padding-left: 18px;
   transition: transform var(--transition);
 }
-.lesson-group.open .lesson-chevron svg { transform: rotate(90deg); }
+/* Rotate the chevron span (same pattern as topic-chevron) */
+.lesson-group.open > .lesson-header .lesson-chevron { transform: rotate(90deg); }
 
 .lesson-title-area {
   flex: 1;
@@ -226,20 +227,44 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.lesson-count {
-  font-size: 0.71rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
 
 /* ── Lesson Videos ─────────────────────────────────────── */
 .lesson-videos {
-  display: none;
+  display: block;
   padding: 3px 0 6px;
   background: var(--bg-primary);
   border-top: 1px solid var(--border-subtle);
 }
-.lesson-group.open .lesson-videos { display: block; }
+
+/* lesson-body wraps lesson-videos + any nested lesson-groups */
+.lesson-body {
+  display: none !important;
+}
+.lesson-group.open > .lesson-body {
+  display: block !important;
+}
+
+/* Chevron rotation works at any nesting depth */
+.lesson-group > .lesson-header > .lesson-chevron {
+  transition: transform var(--transition);
+}
+.lesson-group.open > .lesson-header > .lesson-chevron {
+  transform: rotate(90deg);
+}
+
+/* ── Nested lesson indentation ─────────────────────────── */
+/* Level 3: lesson-group inside a lesson-body */
+.lesson-body > .lesson-group > .lesson-header {
+  padding-left: 14px;
+}
+/* Level 4 */
+.lesson-body .lesson-body > .lesson-group > .lesson-header {
+  padding-left: 28px;
+}
+/* Level 5 */
+.lesson-body .lesson-body .lesson-body > .lesson-group > .lesson-header {
+  padding-left: 42px;
+}
 
 /* ── Video Item ────────────────────────────────────────── */
 .video-item {
@@ -274,18 +299,17 @@
 
 /* Status icon column */
 .video-status {
-  width: 56px;
+  width: 46px;
   height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding-left: 30px;
 }
 
 .status-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -326,7 +350,7 @@
 /* Video text */
 .video-text {
   flex: 1;
-  padding: 10px 12px 10px 0;
+  padding: 10px 12px 10px 8px;
   min-width: 0;
 }
 .video-title {
@@ -348,7 +372,18 @@
   font-family: var(--font-mono);
 }
 
-/* ── Sidebar Footer ────────────────────────────────────── */
+/* Indent video items to match their parent header depth */
+.lesson-body > .lesson-videos > .video-item,
+.lesson-body > .lesson-group > .lesson-body > .lesson-videos > .video-item {
+  padding-left: 14px;
+}
+.lesson-body .lesson-body > .lesson-videos > .video-item,
+.lesson-body .lesson-body > .lesson-group > .lesson-body > .lesson-videos > .video-item {
+  padding-left: 28px;
+}
+.lesson-body .lesson-body .lesson-body > .lesson-videos > .video-item {
+  padding-left: 42px;
+}
 .sidebar-footer {
   padding: 8px 12px;
   border-top: 1px solid var(--border);

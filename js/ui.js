@@ -111,7 +111,7 @@ const UI = (() => {
 
   function _renderTree() {
     sidebarNav.innerHTML = '';
-    if (!currentCourse || !currentCourse.topics.length) {
+    if (!currentCourse || !currentCourse.root) {
       sidebarNav.innerHTML = `
         <div class="sidebar-empty">
           ${_icon('folder-open', 32)}
@@ -122,100 +122,155 @@ const UI = (() => {
 
     const completed = Storage.getCompleted();
 
-    currentCourse.topics.forEach((topic, ti) => {
-      const totalVids    = topic.lessons.reduce((s, l) => s + l.videos.length, 0);
-      const completedVids = topic.lessons.reduce((s, l) =>
-        s + l.videos.filter(v => completed.has(v.id)).length, 0);
+    // Root-level videos (flat course with no sub-folders)
+    if (currentCourse.root.videos.length > 0) {
+      const wrap = _makeVideoList(currentCourse.root.videos, completed);
+      sidebarNav.appendChild(wrap);
+    }
 
-      const isAllDone  = completedVids === totalVids && totalVids > 0;
-      const isSomeDone = completedVids > 0 && !isAllDone;
+    // Each direct child of root becomes a top-level topic-group
+    currentCourse.root.children.forEach(topicNode => {
+      sidebarNav.appendChild(_renderTopicGroup(topicNode, completed));
+    });
+  }
 
-      const group = document.createElement('div');
-      group.className = [
-        'topic-group',
-        'open',   // all topics expanded by default
-        isAllDone ? 'all-complete' : '',
-        isSomeDone ? 'some-complete' : '',
-      ].filter(Boolean).join(' ');
+  /**
+   * Render a top-level folder as a `topic-group` (bold header, progress dot).
+   * Its children are rendered as `lesson-group`s inside `.topic-lessons`.
+   */
+  function _renderTopicGroup(node, completed) {
+    const allVids       = _collectVideos(node);
+    const totalVids     = allVids.length;
+    const completedVids = allVids.filter(v => completed.has(v.id)).length;
+    const isAllDone     = totalVids > 0 && completedVids === totalVids;
+    const isSomeDone    = completedVids > 0 && !isAllDone;
 
-      group.innerHTML = `
-        <button class="topic-header" aria-expanded="true">
-          <span class="topic-chevron">${_icon('chevron-right', 14)}</span>
-          <span class="topic-title-area">
-            <span class="topic-title">${_esc(topic.title)}</span>
-            <span class="topic-meta">${completedVids} / ${totalVids} completed</span>
-          </span>
-          <span class="topic-progress-dot"></span>
-        </button>
-        <div class="topic-lessons"></div>`;
+    const group = document.createElement('div');
+    group.className = [
+      'topic-group open',
+      isAllDone  ? 'all-complete'  : '',
+      isSomeDone ? 'some-complete' : '',
+    ].filter(Boolean).join(' ');
+    group.dataset.nodeId = node.id;
 
-      const header  = group.querySelector('.topic-header');
-      const lessonsEl = group.querySelector('.topic-lessons');
+    const header = document.createElement('button');
+    header.className = 'topic-header';
+    header.setAttribute('aria-expanded', 'true');
+    header.innerHTML = `
+      <span class="topic-chevron">${_icon('chevron-right', 14)}</span>
+      <span class="topic-title-area">
+        <span class="topic-title">${_esc(node.rawName)}</span>
+      </span>
+      <span class="topic-progress-dot"></span>`;
 
-      header.addEventListener('click', () => {
-        group.classList.toggle('open');
-        header.setAttribute('aria-expanded', group.classList.contains('open'));
-      });
+    const lessonsEl = document.createElement('div');
+    lessonsEl.className = 'topic-lessons';
 
-      // Render lessons
-      topic.lessons.forEach((lesson, li) => {
-        const lessonGroup = document.createElement('div');
-        lessonGroup.className = 'lesson-group open'; // all lessons expanded by default
-        lessonGroup.dataset.lessonId = lesson.id;
-
-        const completedInLesson = lesson.videos.filter(v => completed.has(v.id)).length;
-
-        lessonGroup.innerHTML = `
-          <button class="lesson-header">
-            <span class="lesson-chevron">${_icon('chevron-right', 12)}</span>
-            <span class="lesson-title-area">
-              <span class="lesson-title">${_esc(lesson.title)}</span>
-              <span class="lesson-count">${lesson.videos.length} video${lesson.videos.length !== 1 ? 's' : ''}</span>
-            </span>
-          </button>
-          <div class="lesson-videos"></div>`;
-
-        const lHeader    = lessonGroup.querySelector('.lesson-header');
-        const videosEl   = lessonGroup.querySelector('.lesson-videos');
-
-        lHeader.addEventListener('click', () => {
-          lessonGroup.classList.toggle('open');
-        });
-
-        // Render videos
-        lesson.videos.forEach(video => {
-          const isComplete = completed.has(video.id);
-          const item = document.createElement('button');
-          item.className = 'video-item' + (isComplete ? ' completed' : '');
-          item.dataset.videoId = video.id;
-
-          const statusClass = isComplete ? 'completed' : 'not-started';
-          const statusIcon  = isComplete
-            ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
-            : '';
-
-          item.innerHTML = `
-            <span class="video-status">
-              <span class="status-icon ${statusClass}">${statusIcon}</span>
-            </span>
-            <span class="video-text">
-              <span class="video-title">${_esc(video.title)}</span>
-            </span>`;
-
-          item.addEventListener('click', () => {
-            onVideoSelect(video);
-          });
-
-          videosEl.appendChild(item);
-        });
-
-        lessonsEl.appendChild(lessonGroup);
-      });
-
-      sidebarNav.appendChild(group);
+    header.addEventListener('click', () => {
+      group.classList.toggle('open');
+      header.setAttribute('aria-expanded', group.classList.contains('open'));
     });
 
-    _renderSidebarFooter();
+    group.appendChild(header);
+    group.appendChild(lessonsEl);
+
+    // Videos directly in this topic folder → one implicit lesson-group
+    if (node.videos.length > 0) {
+      lessonsEl.appendChild(_makeVideoList(node.videos, completed));
+    }
+
+    // Each child folder becomes a lesson-group
+    node.children.forEach(lessonNode => {
+      lessonsEl.appendChild(_renderLessonGroup(lessonNode, completed));
+    });
+
+    return group;
+  }
+
+  /**
+   * Render a child folder as a `lesson-group` (secondary header, collapsible).
+   * Any further nested children are rendered as additional lesson-groups inside
+   * this lesson's body — giving unlimited nesting with the v3 visual style.
+   */
+  function _renderLessonGroup(node, completed) {
+    const allVids       = _collectVideos(node);
+    const videoCount    = allVids.length;
+
+    const lessonGroup = document.createElement('div');
+    lessonGroup.className = 'lesson-group open';
+    lessonGroup.dataset.nodeId = node.id;
+
+    const lHeader = document.createElement('button');
+    lHeader.className = 'lesson-header';
+    lHeader.innerHTML = `
+      <span class="lesson-chevron">${_icon('chevron-right', 12)}</span>
+      <span class="lesson-title-area">
+        <span class="lesson-title">${_esc(node.rawName)}</span>
+      </span>`;
+
+    const body = document.createElement('div');
+    body.className = 'lesson-body'; // wrapper so open/close works on the whole subtree
+
+    lHeader.addEventListener('click', () => {
+      lessonGroup.classList.toggle('open');
+    });
+
+    lessonGroup.appendChild(lHeader);
+    lessonGroup.appendChild(body);
+
+    // Videos directly in this lesson folder
+    if (node.videos.length > 0) {
+      body.appendChild(_makeVideoList(node.videos, completed));
+    }
+
+    // Further nested folders → more lesson-groups (recursive, unlimited depth)
+    node.children.forEach(child => {
+      body.appendChild(_renderLessonGroup(child, completed));
+    });
+
+    return lessonGroup;
+  }
+
+  /**
+   * Build a `.lesson-videos` element containing video-item buttons.
+   */
+  function _makeVideoList(videos, completed) {
+    const wrap = document.createElement('div');
+    wrap.className = 'lesson-videos';
+
+    videos.forEach(video => {
+      const isComplete = completed.has(video.id);
+      const item       = document.createElement('button');
+      item.className   = 'video-item' + (isComplete ? ' completed' : '');
+      item.dataset.videoId = video.id;
+
+      const statusClass = isComplete ? 'completed' : 'not-started';
+      const statusIcon  = isComplete
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+        : '';
+
+      item.innerHTML = `
+        <span class="video-status">
+          <span class="status-icon ${statusClass}">${statusIcon}</span>
+        </span>
+        <span class="video-text">
+          <span class="video-title">${_esc(video.title)}</span>
+        </span>`;
+
+      item.addEventListener('click', () => onVideoSelect(video));
+      wrap.appendChild(item);
+    });
+
+    return wrap;
+  }
+
+  /** Collect all video objects recursively from a node. */
+  function _collectVideos(node) {
+    const vids = [...node.videos];
+    for (const child of node.children) {
+      vids.push(..._collectVideos(child));
+    }
+    return vids;
   }
 
   function _renderSidebarFooter() {
