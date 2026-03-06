@@ -1,0 +1,73 @@
+I want to build a "Local Coursera Player"—a web-based UI to play, organize, and track progress for downloaded Coursera videos. Use HTML5, CSS3, and Vanilla JavaScript only. No frameworks, no dependencies, no installation required.
+### **1. Visual Design (Referencing Coursera UI)**
+
+
+* **Layout:** A three-pane responsive layout.
+* **Left Sidebar:** Collapsible navigation tree showing Topics/Lessons. Use checkmarks (green) for completed videos.
+* **Main Center:** Content Header (Breadcrumbs) + Video Player.
+* **Bottom Right:** A "Go to Next Item" button.
+
+
+* **Theme:** Modern, clean, professional. Support a Dark/Light mode toggle in settings.
+
+
+### **2. Core Functionality & File Handling**
+
+
+* **Folder Loading:** Implement a "Select Course Folder" button using `<input type="file" webkitdirectory>`.
+* **Parsing Logic:** Recursively scan the selected folder. Recognize the pattern `[Number]_[Name]` or `[Number].[Name]`.
+* **String Cleaning:** Transform folder/file names (e.g., `01_unsupervised-learning` → `1. Unsupervised Learning`) by removing hyphens/underscores and capitalizing words.
+* **Progress Tracking:** Use `localStorage` to save the "last watched" video and a list of completed video IDs.
+
+
+### **3. Video Player Features (YouTube-style)**
+
+
+* **Controls:** Custom-styled play/pause, volume, and a progress bar.
+* **Subtitles:** Automatically detect and load `.srt` or `.vtt` files that match the video filename in the same folder.
+* **Speed:** UI dropdown for playback speeds (0.75x to 2x).
+* **Interaction:** >     * Arrow keys (Left/Right) for seeking (configurable: 5s or 10s).
+* **Long-press Spacebar:** Speed up to 2x; return to normal speed on release.
+* **Auto-advance:** When a video ends, automatically load the next video from the sidebar list.
+
+
+
+
+### **4. Settings Page**
+
+
+* A modal or overlay to:
+* Change seek intervals (5s vs 10s).
+* Toggle Dark/Light theme.
+* Clear all learning progress/history.
+* Export progress from localStorage to JSON file.
+
+
+
+
+### **5. Data Structure Example (For Context)**
+
+
+The script must handle this structure dynamically:
+`Machine Learning/ -> 1. machine-learning/ -> 01_intro/ -> 01_video.mp4 + 01_video.en.srt`
+**Exclude:** Daily goals, "Start Trial" buttons, and login/account systems. 
+
+Please organize the code into a clean, modular structure. Do not cram everything into one file.
+* `index.html`: The entry point.
+* `css/`:
+* `main.css`: Layout and core variables.
+* `player.css`: Custom video player styling.
+* `sidebar.css`: Course navigation and progress icons.
+
+
+* `js/`:
+* `app.js`: Main initialization and event listeners.
+* `parser.js`: Logic for scanning the folder and building the course tree.
+* `player.js`: Video controls, speed logic, and long-press shortcuts.
+* `storage.js`: Wrapper for `localStorage` (getting/setting progress).
+* `ui.js`: Theme switching and UI state management.
+
+Exclusions: No login systems, no cloud sync, no "Daily Goals," and no commercial marketing bloat.
+
+Make the page "npm free", meaning no depenency installations, no React, no Tailwind, no Vite, no Next.js
+

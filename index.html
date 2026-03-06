@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Coursera Player</title>
+
+  <!-- Stylesheets (order matters) -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/player.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOP HEADER
+══════════════════════════════════════════════════════════ -->
+<header id="app-header">
+
+  <!-- Sidebar toggle -->
+  <button id="sidebar-toggle" data-tooltip="Hide sidebar" aria-label="Toggle sidebar">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="18" height="18" x="3" y="3" rx="2"/>
+      <path d="M9 3v18"/>
+      <path d="m16 15-3-3 3-3"/>
+    </svg>
+  </button>
+
+  <!-- Logo -->
+  <div class="app-logo">
+    <div class="app-logo-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+    </div>
+    <span class="app-logo-name">CoursePlayer</span>
+  </div>
+
+  <!-- Breadcrumbs -->
+  <nav id="breadcrumbs" aria-label="Breadcrumb">
+    <span class="breadcrumb-item">Select a course folder to begin</span>
+  </nav>
+
+  <!-- Header action buttons -->
+  <div class="header-actions">
+    <!-- Open folder -->
+    <button class="header-btn" id="open-folder-header" data-tooltip="Open course folder" aria-label="Open course folder">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>
+      </svg>
+    </button>
+    <!-- Theme -->
+    <button class="header-btn" id="theme-btn" data-tooltip="Toggle theme" aria-label="Toggle theme">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+      </svg>
+    </button>
+    <!-- Settings -->
+    <button class="header-btn" id="settings-btn" data-tooltip="Settings" aria-label="Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+
+</header>
+
+<!-- Hidden folder input -->
+<input type="file" id="folder-input" webkitdirectory multiple aria-hidden="true" />
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MAIN BODY
+══════════════════════════════════════════════════════════ -->
+<div id="app-body">
+
+  <!-- ── LEFT SIDEBAR ────────────────────────────────────── -->
+  <aside id="sidebar" aria-label="Course navigation">
+
+    <!-- Sidebar header: course title + progress -->
+    <div class="sidebar-header">
+      <div id="sidebar-course-title" class="sidebar-course-title">No Course Loaded</div>
+      <div class="sidebar-progress-info">
+        <span class="sidebar-progress-label">Course Progress</span>
+        <span id="sidebar-progress-pct" class="sidebar-progress-pct">0%</span>
+      </div>
+      <div class="course-progress-bar">
+        <div id="sidebar-progress-fill" class="course-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Load button inside sidebar when empty -->
+    <div class="sidebar-load-area">
+      <button class="btn btn-primary btn-sm" id="open-folder-sidebar-btn"
+              onclick="document.getElementById('folder-input').click()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>
+        </svg>
+        Select Course Folder
+      </button>
+    </div>
+
+    <!-- Navigation tree -->
+    <nav id="sidebar-nav" aria-label="Course content">
+      <!-- Rendered by ui.js -->
+      <div class="sidebar-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>
+        </svg>
+        <span>Load a course folder<br>to see your content here.</span>
+      </div>
+    </nav>
+
+    <!-- Sidebar footer: stats -->
+    <div class="sidebar-footer">
+      <div id="sidebar-footer-stats" class="sidebar-stats">
+        <div class="stat-pill">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Done</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Progress</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+
+  <!-- ── MAIN CONTENT ─────────────────────────────────────── -->
+  <main id="main-content">
+
+    <!-- ── Welcome Screen ───────────────────────────────── -->
+    <div id="welcome-screen">
+      <div class="welcome-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </div>
+      <h1 class="welcome-title">Local Coursera Player</h1>
+      <p class="welcome-subtitle">
+        Load a folder of downloaded course videos to start learning.
+        Your progress is saved automatically — no account needed.
+      </p>
+      <div class="welcome-actions">
+        <button class="btn btn-primary" id="open-folder-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Select Course Folder
+        </button>
+        <button class="btn btn-secondary" id="settings-btn-welcome" onclick="UI.openSettings()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Settings
+        </button>
+      </div>
+
+      <!-- Keyboard shortcuts hint -->
+      <div style="margin-top:32px; padding:16px 24px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-md); max-width:420px; text-align:left;">
+        <div style="font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:10px;">Keyboard Shortcuts</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:0.8rem;color:var(--text-secondary);">
+          <span><kbd style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono);font-size:0.75rem;">Space</kbd> Play / Pause</span>
+          <span><kbd style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono);font-size:0.75rem;">←  →</kbd> Seek ±5s</span>
+          <span><kbd style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono);font-size:0.75rem;">↑  ↓</kbd> Volume</span>
+          <span><kbd style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono);font-size:0.75rem;">F</kbd> Fullscreen</span>
+          <span><kbd style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono);font-size:0.75rem;">M</kbd> Mute</span>
+          <span><kbd style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono);font-size:0.75rem;">Hold Space</kbd> 2× speed</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── Player Screen ─────────────────────────────────── -->
+    <div id="player-screen">
+
+      <!-- Video info bar -->
+      <div id="video-info-bar">
+        <div>
+          <div id="video-current-title" class="video-current-title">—</div>
+          <div id="video-current-meta" class="video-current-meta"></div>
+        </div>
+        <div class="video-actions">
+          <button class="btn btn-ghost btn-sm btn-icon-only" id="prev-video-btn"
+                  onclick="Player.prev()" data-tooltip="Previous video" aria-label="Previous video">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>
+            </svg>
+          </button>
+          <button class="btn btn-ghost btn-sm btn-icon-only" id="next-video-btn-info"
+                  onclick="Player.next()" data-tooltip="Next video" aria-label="Next video">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Video wrapper -->
+      <div id="video-wrapper">
+
+        <!-- The video element -->
+        <video id="video-el" preload="metadata" playsinline></video>
+
+        <!-- Click overlay -->
+        <div id="video-overlay">
+          <!-- Play indicator flash -->
+          <div class="play-indicator" id="play-indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="white"
+                 stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <!-- Seek indicators -->
+          <div class="seek-indicator left"  id="seek-left-indicator"></div>
+          <div class="seek-indicator right" id="seek-right-indicator"></div>
+        </div>
+
+        <!-- Speed overlay badge -->
+        <div class="speed-overlay-badge" id="speed-overlay-badge">2×</div>
+
+        <!-- Loading spinner -->
+        <div class="video-loading" id="video-loading">
+          <div class="spinner"></div>
+        </div>
+
+        <!-- Auto-advance bar -->
+        <div class="auto-advance-bar" id="auto-advance-bar">
+          <div class="auto-advance-bar-fill" id="auto-advance-bar-fill"></div>
+        </div>
+
+        <!-- Auto-advance toast -->
+        <div class="auto-advance-toast" id="auto-advance-toast">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 4 15 12 5 20 5 4"/>
+          </svg>
+          <span class="toast-text">Next video</span>
+          <button class="auto-advance-cancel" id="auto-advance-cancel">Cancel</button>
+        </div>
+
+      </div><!-- /video-wrapper -->
+
+      <!-- Player Controls -->
+      <div id="player-controls">
+
+        <!-- Scrubber / Progress bar -->
+        <div class="scrubber-container" id="scrubber-container" role="slider"
+             aria-label="Video progress" aria-valuemin="0" aria-valuemax="100">
+          <div class="scrubber-track">
+            <div class="scrubber-buffer"   id="scrubber-buffer"   style="width:0%"></div>
+            <div class="scrubber-progress" id="scrubber-progress" style="width:0%"></div>
+            <div class="scrubber-thumb"    id="scrubber-thumb"    style="left:0%"></div>
+          </div>
+          <div class="scrubber-tooltip" id="scrubber-tooltip">0:00</div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="controls-row">
+
+          <!-- Left controls -->
+          <div class="controls-left">
+            <!-- Play/Pause -->
+            <button class="player-btn" id="play-pause-btn" aria-label="Play/Pause">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </button>
+
+            <!-- Volume -->
+            <div class="volume-group">
+              <button class="player-btn" id="volume-btn" aria-label="Mute/Unmute">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              </button>
+              <div class="volume-slider-wrap">
+                <input type="range" class="volume-slider" id="volume-slider"
+                       min="0" max="100" value="100" aria-label="Volume" />
+              </div>
+            </div>
+
+            <!-- Time -->
+            <div class="time-display" id="time-display">
+              <span class="current">0:00</span>
+              <span class="sep">/</span>
+              0:00
+            </div>
+          </div>
+
+          <!-- Right controls -->
+          <div class="controls-right">
+            <!-- Speed -->
+            <select id="speed-select" aria-label="Playback speed">
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.5×</option>
+              <option value="1.75">1.75×</option>
+              <option value="2">2×</option>
+            </select>
+
+            <!-- Subtitles -->
+            <button class="player-btn" id="subtitle-btn" aria-label="Toggle subtitles" data-tooltip="Subtitles">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M7 15h4M15 15h2M7 11h2M13 11h4"/>
+              </svg>
+            </button>
+
+            <!-- Fullscreen -->
+            <button class="player-btn" id="fullscreen-btn" aria-label="Fullscreen" data-tooltip="Fullscreen">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+          </div>
+
+        </div><!-- /controls-row -->
+      </div><!-- /player-controls -->
+
+    </div><!-- /player-screen -->
+
+
+    <!-- ── Bottom-right Next Item Button ─────────────────── -->
+    <div id="next-btn-container">
+      <button class="btn btn-primary" id="next-video-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 4 15 12 5 20 5 4"/>
+          <line x1="19" y1="5" x2="19" y2="19"/>
+        </svg>
+        <span class="next-btn-label">Next</span>
+      </button>
+    </div>
+
+  </main><!-- /main-content -->
+
+</div><!-- /app-body -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SETTINGS MODAL
+══════════════════════════════════════════════════════════ -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="settings-modal-title">Settings</h2>
+      <button class="modal-close" id="settings-close" aria-label="Close settings">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Appearance -->
+      <div class="settings-section">
+        <div class="settings-label">Appearance</div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Dark Mode</div>
+            <div class="settings-row-desc">Switch between light and dark theme</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="theme-toggle-check" />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Playback -->
+      <div class="settings-section">
+        <div class="settings-label">Playback</div>
+
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Seek Interval</div>
+            <div class="settings-row-desc">Arrow key seek amount</div>
+          </div>
+          <select class="settings-select" id="seek-interval-select">
+            <option value="5">5 seconds</option>
+            <option value="10">10 seconds</option>
+            <option value="15">15 seconds</option>
+            <option value="30">30 seconds</option>
+          </select>
+        </div>
+
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Auto-advance</div>
+            <div class="settings-row-desc">Automatically play the next video</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="auto-advance-check" checked />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="settings-section">
+        <div class="settings-label">Progress & Data</div>
+
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+          <div class="settings-row-label">Export Progress</div>
+          <div class="settings-row-desc" style="margin-top:-6px">
+            Download your progress data as a JSON file.
+          </div>
+          <button class="btn btn-secondary btn-sm" id="export-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export to JSON
+          </button>
+        </div>
+
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+          <div class="settings-row-label">Clear Progress</div>
+          <div class="settings-row-desc" style="margin-top:-6px">
+            Remove all completed video records and resume times. Settings are kept.
+          </div>
+          <button class="btn btn-danger btn-sm" id="clear-progress-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Clear All Progress
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="UI.closeSettings()">Done</button>
+    </div>
+
+  </div><!-- /modal -->
+</div><!-- /modal-overlay -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCRIPTS (order matters)
+══════════════════════════════════════════════════════════ -->
+<script src="js/storage.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/player.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

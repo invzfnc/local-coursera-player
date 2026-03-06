@@ -1,0 +1,50 @@
+I would like to bulid a coursera-like UI for playing local downloaded coursera videos. It should have these basic functions: play videos, sort and list videos by week and topics, keep track of learning progress.
+
+Some requirements for this project:
+- should be web-based. use JavaScript, HTML, and CSS only.
+- index.html as the starting point.
+- no dependencies, no installation, portable.
+- efficient and small sized project.
+- for personal use only. non commercial, no enterprise level stuff.
+- no login. no account management. keep it simple.
+- user specifies a folder path. program should search the folder recursively to list all videos in the sidebar (video folder structure will be provided shortly)
+- has a settings page that supports tweaks such as:
+    - setting source video folder path
+    - switch themes: dark theme or light theme
+    - video seeking preference: 5 seconds or 10 seconds? etc
+- keep stored data at local folder. create a data/ folder to keep all the info needed (example: config.js or settings.js for keeping the settings, progress.js to keep track of learning progress, or whatever deemed fit)
+- for the video player: make it like the YouTube video player. Supports subtitles (can be fetched from the srt file found in the provided folder), video playback speed adjustments (0.75x, 1x, 1.25x, 1.5x, 1.75x, 2x), long press spacebar to fast forward 2x speed (back to original speed when released, exactly like YouTube)
+- go to next item button on the bottom right
+
+exclude these functions/do not implement these functions:
+- daily goals/motivation
+- start free trial button
+- account management/login feature
+    
+
+source video folder structure example
+- please do not hard code the folder structure into the codebase. the script should search the provided folder path (in this case, the Machine Learning Specialization folder) recursively and list them out in the side navigation bar on the left. this makes it reusable with other courses as long as the user provides a well structured folder. develop the search algorithm by recognizing the pattern in folders.
+- additionally, notice that most folders and files has the '-' character in between, remove those and capitalize the wordings as you find suitable for reading, for example: "1. machine-learning" to "1. Machine Learning", and "01_unsupervised-learning" to "1. Unsupervised Learning"
+
+Machine Learning Specialization/
+|_ 1. machine-learning
+|_ 2. advanced-learning-algorithms
+|_ 3. unsupervised-learning-recommenders-reinforcement-learning
+    |_ 01_unsupervised-learning
+        |_ 01_welcome-to-the-course
+            |_ 01_welcome.mp4
+            |_ 01_welcome.en.srt
+        |_ 02_clustering
+            |_ 01_what-is-clustering.mp4
+            |_ 01_what-is-clustering.en.srt
+            |_ 02_k-means-intuition.mp4
+            |_ 02_k-means-intuition.en.srt
+            |_ ...more
+        |_ 03_anomaly-detection
+            |_ ...more
+    |_ 02_recommender-systems
+        |_ ...more
+    |_ 03_reinforcement-learning
+        |_ ...more
+
+Next step: Improve prompt with LLM
