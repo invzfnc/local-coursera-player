@@ -255,15 +255,15 @@
 /* ── Nested lesson indentation ─────────────────────────── */
 /* Level 3: lesson-group inside a lesson-body */
 .lesson-body > .lesson-group > .lesson-header {
-  padding-left: 14px;
+  padding-left: 21px;
 }
 /* Level 4 */
 .lesson-body .lesson-body > .lesson-group > .lesson-header {
-  padding-left: 28px;
+  padding-left: 42px;
 }
 /* Level 5 */
 .lesson-body .lesson-body .lesson-body > .lesson-group > .lesson-header {
-  padding-left: 42px;
+  padding-left: 63px;
 }
 
 /* ── Video Item ────────────────────────────────────────── */
@@ -375,14 +375,14 @@
 /* Indent video items to match their parent header depth */
 .lesson-body > .lesson-videos > .video-item,
 .lesson-body > .lesson-group > .lesson-body > .lesson-videos > .video-item {
-  padding-left: 14px;
+  padding-left: 21px;
 }
 .lesson-body .lesson-body > .lesson-videos > .video-item,
 .lesson-body .lesson-body > .lesson-group > .lesson-body > .lesson-videos > .video-item {
-  padding-left: 28px;
+  padding-left: 42px;
 }
 .lesson-body .lesson-body .lesson-body > .lesson-videos > .video-item {
-  padding-left: 42px;
+  padding-left: 63px;
 }
 .sidebar-footer {
   padding: 8px 12px;

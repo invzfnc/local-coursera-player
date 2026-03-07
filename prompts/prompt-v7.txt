@@ -1,0 +1,28 @@
+v7
+
+The side bar is nearly perfect now. Just need to add this little tweak: Increase the indentation, make it 1.5x the original indentation.
+
+Then, set the page title to the course title (the one in sidebar-course-title) instead of changing it to the currently played video title.
+
+Also, when user click on video-item, don't let the video play automatically. Let user play the video manually.
+
+---
+
+v8
+
+For now, make the breadcrumbs clickable. When clicked, direct the user to the corresponding folder in the sidebar. Expand necessary tabs and highlight briefly the found target.
+
+Also, to complement the export to json function, implement a import from json function
+
+---
+
+v9
+
+Revert everything back to v7, except for the import from json feature, keep that one.
+Then please update css/player.css to style the video subtitles to look like professional "hard-coded" captions.
+
+- Use the ::cue pseudo-element.
+- Background: A semi-transparent black box (rgba(0, 0, 0, 0.8)).
+- Text: White, clean sans-serif font, slightly bold.
+- Positioning: Ensure they sit at the bottom center of the video frame with enough padding.
+- Compatibility: Ensure the parser.js logic correctly creates the blob for the .vtt file and attaches it to the <video> element via a <track> tag so these CSS styles can target it.

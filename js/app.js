@@ -98,6 +98,9 @@
     UI.renderCourse(course, flatList);
     Player.load.__flatList = flatList;
 
+    // Set page title to course name
+    document.title = `${course.title} — Local Coursera Player`;
+
     // Try resume last watched
     const lastWatched = Storage.getLastWatched();
     let startVideo    = flatList[0];
@@ -123,7 +126,6 @@
     UI.setActiveVideo(video.id);
     UI.updateBreadcrumbs(video);
     Storage.saveLastWatched(video.id);
-    document.title = `${video.title} — Local Coursera Player`;
   }
 
   function handleVideoComplete(videoId) {

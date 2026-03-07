@@ -76,7 +76,7 @@ const Player = (() => {
   }
 
   // ── Load a video object ───────────────────────────────────
-  function load(video, list) {
+  function load(video, list, autoPlay = false) {
     if (!video) return;
 
     _cancelAutoAdvance();
@@ -107,9 +107,8 @@ const Player = (() => {
 
     videoEl.addEventListener('loadedmetadata', () => {
       if (resumeTime > 5) videoEl.currentTime = resumeTime;
+      if (autoPlay) videoEl.play().catch(() => {});
     }, { once: true });
-
-    videoEl.play().catch(() => {});
 
     // Update info bar
     videoInfoTitle.textContent = video.title;
@@ -128,20 +127,41 @@ const Player = (() => {
 
   /**
    * Convert an SRT string to a valid WebVTT string.
-   * Handles the timestamp format difference:
+   * Injects a default cue position (bottom-center) into every cue header
+   * so ::cue CSS can style them as professional hard-coded captions.
    *   SRT:  00:00:01,500 --> 00:00:04,000
-   *   VTT:  00:00:01.500 --> 00:00:04.000
+   *   VTT:  00:00:01.500 --> 00:00:04.000 line:88% position:50% align:center
    */
   function _srtToVtt(srtText) {
-    const vtt = srtText
-      // Normalize Windows line endings
+    const normalized = srtText
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
-      // Replace SRT timestamp comma with VTT dot
-      .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2')
-      // Strip any BOM
-      .replace(/^\uFEFF/, '');
-    return 'WEBVTT\n\n' + vtt.trim();
+      .replace(/^\uFEFF/, '')
+      .trim();
+
+    // Split into cue blocks (separated by blank lines)
+    const blocks = normalized.split(/\n\n+/);
+    const vttBlocks = blocks.map(block => {
+      const lines = block.split('\n');
+      // Find the timestamp line (contains ' --> ')
+      const tsIdx = lines.findIndex(l => l.includes(' --> '));
+      if (tsIdx === -1) return null; // skip non-cue blocks
+
+      // Convert SRT timestamps (comma) to VTT (dot) and append position settings
+      lines[tsIdx] = lines[tsIdx]
+        .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2')
+        // Only append position if not already present
+        + (lines[tsIdx].includes('line:') ? '' : ' line:88% position:50% align:center');
+
+      // Drop the numeric cue index line if present (SRT has it, VTT doesn't need it)
+      if (tsIdx === 1 && /^\d+$/.test(lines[0].trim())) {
+        lines.shift();
+      }
+
+      return lines.join('\n');
+    }).filter(Boolean);
+
+    return 'WEBVTT\n\n' + vttBlocks.join('\n\n');
   }
 
   /**
@@ -166,10 +186,14 @@ const Player = (() => {
       try {
         let text = await _readFileText(file);
         const isSrt = file.name.toLowerCase().endsWith('.srt');
+        const isVtt = file.name.toLowerCase().endsWith('.vtt');
 
-        // Convert SRT → VTT on the fly
         if (isSrt) {
+          // Full conversion: timestamps + position injection
           text = _srtToVtt(text);
+        } else if (isVtt) {
+          // Inject position into existing VTT cue headers that lack it
+          text = _injectVttPosition(text);
         }
 
         const blob    = new Blob([text], { type: 'text/vtt' });
@@ -197,6 +221,17 @@ const Player = (() => {
         console.warn('Subtitle load error:', file.name, err);
       }
     }
+  }
+
+  /**
+   * Inject bottom-center position settings into VTT cue timestamp lines
+   * that don't already have positioning directives.
+   */
+  function _injectVttPosition(vttText) {
+    return vttText.replace(
+      /^(\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3})(?!\s*line:)(.*)$/gm,
+      '$1 line:88% position:50% align:center$2'
+    );
   }
 
   function _detectLang(filename) {
@@ -560,13 +595,13 @@ const Player = (() => {
   function next() {
     _cancelAutoAdvance();
     if (hasNext()) {
-      load(flatList[currentIndex + 1], flatList);
+      load(flatList[currentIndex + 1], flatList, true);
     }
   }
 
   function prev() {
     if (hasPrev()) {
-      load(flatList[currentIndex - 1], flatList);
+      load(flatList[currentIndex - 1], flatList, true);
     }
   }
 

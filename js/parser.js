@@ -177,7 +177,6 @@ const Parser = (() => {
     for (const v of node.videos) {
       list.push({
         ...v,
-        // breadcrumb: array of ancestor display titles (excluding root)
         breadcrumb: ancestors.map(a => a.title),
         topicTitle:  ancestors[0]?.title  || node.title,
         lessonTitle: ancestors.slice(-1)[0]?.title || node.title,

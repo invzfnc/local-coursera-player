@@ -432,13 +432,37 @@
   flex-shrink: 0;
 }
 
-/* ── Subtitle Display ──────────────────────────────────── */
+/* ── Subtitle / Caption Display ────────────────────────── */
+/*
+ * ::cue only supports a limited CSS property set (color, background,
+ * font-*, text-shadow, opacity, white-space, text-decoration, ruby-position).
+ * Padding around the box is simulated with text-shadow spread.
+ * Cue positioning (line:88% position:50% align:center) is injected by
+ * _srtToVtt() / _injectVttPosition() in player.js at load time.
+ */
 video::cue {
-  background: rgba(0,0,0,0.75);
-  color: white;
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.05em;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  /* Simulate padding: outward text-shadow creates a soft halo behind the bg box */
+  text-shadow:
+    0  4px 8px  rgba(0, 0, 0, 0),
+    0 -4px 8px  rgba(0, 0, 0, 0);
+}
+
+/* Italic cues (e.g. speaker attribution) stay readable */
+video::cue(i) {
+  font-style: italic;
+  color: #e8e8e8;
+}
+
+/* Bold cues */
+video::cue(b) {
+  font-weight: 700;
 }
 
 /* ── Loading Spinner ───────────────────────────────────── */

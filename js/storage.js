@@ -154,6 +154,38 @@ const Storage = (() => {
   }
 
   /**
+   * Import progress data from a previously exported JSON object.
+   * Returns { ok: true } on success or { ok: false, error: string } on failure.
+   */
+  function importProgress(data) {
+    try {
+      if (typeof data !== 'object' || data === null) throw new Error('Invalid data');
+
+      if (Array.isArray(data.completed)) {
+        _set('completed', data.completed);
+      }
+      if (data.last_watched && typeof data.last_watched === 'object') {
+        _set('last_watched', data.last_watched);
+      }
+      if (data.resume_times && typeof data.resume_times === 'object') {
+        _set('resume_times', data.resume_times);
+      }
+      // Import settings selectively — don't blindly overwrite unknowns
+      if (data.settings && typeof data.settings === 'object') {
+        const allowed = ['theme', 'seekInterval', 'autoAdvance', 'volume', 'playbackSpeed'];
+        const current = _get('settings', {});
+        for (const key of allowed) {
+          if (key in data.settings) current[key] = data.settings[key];
+        }
+        _set('settings', current);
+      }
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  }
+
+  /**
    * Export all data to a downloadable JSON file.
    */
   function exportProgress() {
@@ -196,7 +228,7 @@ const Storage = (() => {
     // Settings
     getSetting, setSetting, getAllSettings,
     // Admin
-    clearProgress, clearAll, exportProgress,
+    clearProgress, clearAll, exportProgress, importProgress,
     getCourseStats,
   };
 

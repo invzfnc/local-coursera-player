@@ -390,6 +390,38 @@ const UI = (() => {
         Storage.exportProgress();
         showToast('Progress exported');
       });
+
+    // Import
+    const importFileInput = document.getElementById('import-file-input');
+    document.getElementById('import-btn')
+      ?.addEventListener('click', () => {
+        importFileInput?.click();
+      });
+
+    importFileInput?.addEventListener('change', e => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data   = JSON.parse(ev.target.result);
+          const result = Storage.importProgress(data);
+          if (result.ok) {
+            // Re-render tree to reflect imported completion states
+            if (currentCourse) _renderTree();
+            _updateProgress();
+            showToast('Progress imported successfully');
+          } else {
+            showToast('Import failed: ' + result.error);
+          }
+        } catch {
+          showToast('Import failed: invalid JSON file');
+        }
+        // Reset so same file can be re-imported
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    });
   }
 
   function openSettings() {
