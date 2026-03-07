@@ -48,13 +48,13 @@ A self-contained, offline-first web UI for playing, organizing, and tracking pro
 
 | Key | Action |
 |-----|--------|
-| `Space` | Play / Pause |
 | `Hold Space` | Temporarily speed up to 2× |
 | `← / →` | Seek backward / forward (configurable) |
 | `↑ / ↓` | Volume up / down |
 | `F` | Toggle fullscreen |
 | `M` | Toggle mute |
 | `C` | Toggle captions |
+| `p` | Play / Pause |
 
 ## 📁 Expected Folder Structure
 
