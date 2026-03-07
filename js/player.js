@@ -533,6 +533,10 @@ const Player = (() => {
           if (videoEl.paused) togglePlay();
         }
         break;
+      case 'p':
+      case 'P':
+        togglePlay();
+        break;
       case 'ArrowRight':
         e.preventDefault();
         seek(seekSec);
