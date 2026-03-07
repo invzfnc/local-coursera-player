@@ -244,24 +244,45 @@ const UI = (() => {
       item.className   = 'video-item' + (isComplete ? ' completed' : '');
       item.dataset.videoId = video.id;
 
-      const statusClass = isComplete ? 'completed' : 'not-started';
-      const statusIcon  = isComplete
-        ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
-        : '';
+      const statusSpan = document.createElement('span');
+      statusSpan.className = 'video-status';
+      statusSpan.innerHTML = `<span class="status-icon ${isComplete ? 'completed' : 'not-started'}">${isComplete ? _checkSvg() : ''}</span>`;
 
-      item.innerHTML = `
-        <span class="video-status">
-          <span class="status-icon ${statusClass}">${statusIcon}</span>
-        </span>
-        <span class="video-text">
-          <span class="video-title">${_esc(video.title)}</span>
-        </span>`;
+      const textSpan = document.createElement('span');
+      textSpan.className = 'video-text';
+      textSpan.innerHTML = `<span class="video-title">${_esc(video.title)}</span>`;
+
+      item.appendChild(statusSpan);
+      item.appendChild(textSpan);
+
+      // Status icon toggles completed state; does not load the video
+      statusSpan.addEventListener('click', e => {
+        e.stopPropagation();
+        const icon       = statusSpan.querySelector('.status-icon');
+        const nowDone    = !item.classList.contains('completed');
+        if (nowDone) {
+          Storage.markComplete(video.id);
+          item.classList.add('completed');
+          icon.className   = 'status-icon completed';
+          icon.innerHTML   = _checkSvg();
+        } else {
+          Storage.markIncomplete(video.id);
+          item.classList.remove('completed');
+          icon.className   = 'status-icon not-started';
+          icon.innerHTML   = '';
+        }
+        _updateProgress();
+      });
 
       item.addEventListener('click', () => onVideoSelect(video));
       wrap.appendChild(item);
     });
 
     return wrap;
+  }
+
+  function _checkSvg() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
   }
 
   /** Collect all video objects recursively from a node. */

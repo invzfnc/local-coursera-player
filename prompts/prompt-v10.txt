@@ -1,0 +1,4 @@
+Perfect. A few more tweaks:
+* Now I need a new shortcut key binding, 'c' to toggle on or off captions.
+* For videos that are marked as completed, delete them from the clp_resume_times.
+* Make .status-icon.completed clickable, user can toggle the completed state manually by clicking on the status icon.

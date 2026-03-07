@@ -561,6 +561,10 @@ const Player = (() => {
       case 'M':
         _toggleMute();
         break;
+      case 'c':
+      case 'C':
+        _toggleSubtitles();
+        break;
     }
   }
 

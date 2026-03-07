@@ -43,12 +43,13 @@ const Storage = (() => {
   }
 
   /**
-   * Mark a video ID as completed.
+   * Mark a video ID as completed and remove its resume time.
    */
   function markComplete(videoId) {
     const set = getCompleted();
     set.add(videoId);
     _set('completed', [...set]);
+    deleteResumeTime(videoId);
   }
 
   /**
@@ -58,6 +59,15 @@ const Storage = (() => {
     const set = getCompleted();
     set.delete(videoId);
     _set('completed', [...set]);
+  }
+
+  /**
+   * Delete the resume time entry for a single video.
+   */
+  function deleteResumeTime(videoId) {
+    const map = _get('resume_times', {});
+    delete map[videoId];
+    _set('resume_times', map);
   }
 
   /**
@@ -224,7 +234,7 @@ const Storage = (() => {
     // Progress
     getCompleted, markComplete, markIncomplete, isCompleted,
     saveLastWatched, getLastWatched,
-    saveResumeTime, getResumeTime,
+    saveResumeTime, getResumeTime, deleteResumeTime,
     // Settings
     getSetting, setSetting, getAllSettings,
     // Admin

@@ -305,6 +305,19 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background var(--transition);
+}
+.video-status:hover {
+  background: var(--bg-hover);
+}
+.video-status:hover .status-icon.not-started {
+  border-color: var(--accent);
+}
+.video-status:hover .status-icon.completed {
+  background: var(--text-muted);
+  border-color: var(--text-muted);
 }
 
 .status-icon {
