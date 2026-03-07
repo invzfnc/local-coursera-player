@@ -178,7 +178,6 @@
   overflow: visible;
   transition: height 0.15s;
 }
-.scrubber-container:hover .scrubber-track { height: 6px; }
 
 .scrubber-buffer {
   position: absolute;
