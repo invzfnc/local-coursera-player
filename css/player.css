@@ -440,12 +440,11 @@
  * _srtToVtt() / _injectVttPosition() in player.js at load time.
  */
 video::cue {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.6);
   color: #ffffff;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.05em;
-  font-weight: 600;
-  line-height: 1.6;
+  font-size: 0.8em;
+  line-height: 1.3;
   white-space: pre-wrap;
   /* Simulate padding: outward text-shadow creates a soft halo behind the bg box */
   text-shadow:
